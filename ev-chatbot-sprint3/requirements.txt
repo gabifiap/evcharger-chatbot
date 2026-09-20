@@ -1,0 +1,9 @@
+langchain-core>=1.0
+langchain-ollama>=1.0
+langchain-classic>=1.0   # ConversationTokenBufferMemory (legacy) vive aqui no LangChain 1.x
+pydantic>=2.5
+tiktoken>=0.7
+python-dotenv>=1.0
+# Opcionais:
+# langchain-google-genai   # bônus multi-provider (Gemini)
+# google-genai             # só para rodar o baseline legacy/bot_sprint2.py
