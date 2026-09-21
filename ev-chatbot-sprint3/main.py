@@ -37,7 +37,7 @@ def main():
             print(obj.model_dump_json(indent=2) if obj else f"ERRO: {erro}"); continue
         r = chat.perguntar(txt, sid)
         print(f"\nbot> {r.resposta}\n")
-        tag = f"BLOQUEADO ({r.categoria_bloqueio})" if r.bloqueado else f"tokens {r.tokens_prompt}/{r.tokens_resposta} [{r.fonte_tokens}]"
+        tag = f"BLOQUEADO ({r.categoria_bloqueio})" if r.bloqueado else f"tokens {r.tokens_prompt}/{r.tokens_resposta_est} [{r.fonte_tokens}]"
         print(f"     [{r.latencia_s:.1f}s | {tag} | histórico {r.historico_msgs} msgs, {r.historico_tokens} tok"
               + (f" | ajustes {r.ajustes}" if r.ajustes else "") + "]\n")
 

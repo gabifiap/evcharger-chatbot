@@ -24,16 +24,18 @@ class Resultado:
     categoria_bloqueio: Optional[str] = None  
     ajustes: list = field(default_factory=list)  
     latencia_s: float = 0.0
-    tokens_prompt: int = 0               
+    tokens_prompt: int = 0                  
     fonte_tokens: str = "guardrail"
-    tokens_prompt_est: int = 0           
+    tokens_prompt_est: int = 0              
     tokens_resposta_est: int = 0
     historico_msgs: int = 0
     historico_tokens: int = 0
+    extra_1: any = None  # Campo extra para alinhar a contagem
+    extra_2: any = None  # Campo extra para alinhar a contagem
 
     def dict(self):
         return asdict(self)
-
+    
 
 class ChatEV:
     def __init__(self, versao="v3", provider="ollama", model=None, llm=None, llm_json=None,
