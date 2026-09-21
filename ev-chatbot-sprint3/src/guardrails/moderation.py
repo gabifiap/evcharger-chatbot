@@ -1,4 +1,4 @@
-"""Guardrail de SAÍDA (camada 4 da revisão de segurança da Aula 01).
+"""Guardrail de saída(camada 4 da revisão de segurança da Aula 01).
 
 1. Vazamento do prompt de sistema -> troca por recusa.
 2. Especificação inventada: código de produto (ex.: GW50K-HCA-20) que não está na base e não veio da

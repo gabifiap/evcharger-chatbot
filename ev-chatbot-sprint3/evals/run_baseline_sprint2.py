@@ -1,6 +1,6 @@
-"""Roda o MESMO eval no bot ORIGINAL da Sprint 2 (Gemini + prompt v1 + sem memória) -> coluna "antes".
-Requer: pip install google-genai  e  GEMINI_API_KEY no .env (chave NOVA).
-Tokens são ESTIMADOS com tiktoken (o bot legado não expõe usage_metadata): prompt completo + pergunta.
+"""Roda o mesmo eval no bot original da Sprint 2 (Gemini + prompt v1 + sem memória) -> coluna "antes".
+Requer: pip install google-genai  e  GEMINI_API_KEY no .env (chave nova).
+Tokens são estimados com tiktoken (o bot legado não expõe usage_metadata): prompt completo + pergunta.
 Uso: python -m evals.run_baseline_sprint2"""
 import argparse
 import time

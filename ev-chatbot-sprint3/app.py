@@ -1,4 +1,4 @@
-"""Front simples em Streamlit (OPCIONAL: o enunciado não exige interface).
+"""Front simples em Streamlit 
 Uso:  pip install streamlit   e depois   streamlit run app.py
 Usa a mesma ChatEV do terminal: guardrails + memória por sessão + prompt versionado."""
 import uuid

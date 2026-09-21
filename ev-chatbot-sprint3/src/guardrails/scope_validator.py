@@ -1,4 +1,4 @@
-"""Guardrail de ENTRADA (camada 2 da revisão de segurança da Aula 01).
+"""Guardrail de entrada (camada 2 da revisão de segurança da Aula 01).
 
 Determinístico e barato: bloqueia jailbreak/prompt injection, temas fora do escopo GoodWe e pedidos
 de aconselhamento jurídico/financeiro/intervenção elétrica (orientando profissional habilitado).

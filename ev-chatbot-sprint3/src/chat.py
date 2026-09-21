@@ -21,13 +21,12 @@ class Resultado:
     pergunta: str
     resposta: str
     bloqueado: bool = False
-    categoria_bloqueio: Optional[str] = None  # categoria do bloqueio (guardrail de entrada)
-    ajustes: list = field(default_factory=list)  # ajustes do guardrail de saída
+    categoria_bloqueio: Optional[str] = None  
+    ajustes: list = field(default_factory=list)  
     latencia_s: float = 0.0
-    tokens_prompt: int = 0               # real (usage_metadata) se disponível, senão estimado
-    tokens_resposta: int = 0
+    tokens_prompt: int = 0               
     fonte_tokens: str = "guardrail"
-    tokens_prompt_est: int = 0           # SEMPRE estimado com tiktoken (comparável ao baseline)
+    tokens_prompt_est: int = 0           
     tokens_resposta_est: int = 0
     historico_msgs: int = 0
     historico_tokens: int = 0
@@ -45,7 +44,7 @@ class ChatEV:
         self.prompt = montar_prompt(versao)
         self.memoria = MemoriaSessoes(self.llm, max_tokens_historico or config.MAX_TOKENS_HISTORICO)
         base = build_chat_chain(self.llm, versao, prompt=self.prompt).with_retry(stop_after_attempt=3)
-        with warnings.catch_warnings():  # RunnableWithMessageHistory é deprecated, mas é exigido pelo enunciado
+        with warnings.catch_warnings(): 
             warnings.simplefilter("ignore")
             self.chain = RunnableWithMessageHistory(
                 base, self.memoria.get_history, input_messages_key="pergunta", history_messages_key="history"

@@ -1,4 +1,4 @@
-"""Gera a tabela ANTES/DEPOIS (obrigatória no relatório, §8) em Markdown.
+"""Gera a tabela ANTES/DEPOIS 
 Uso: python -m evals.comparar evals/baseline_sprint2_results.json evals/sprint3_results.json"""
 import json
 import sys
