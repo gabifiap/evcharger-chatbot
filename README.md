@@ -42,7 +42,7 @@ No Linux ou Mac: `cp .env.example .env`. Abra o arquivo `.env` e cole a chave de
 **4. Rode o que quiser:**
 ```
 python -m tests.test_offline               testes automáticos (não precisam de chave nem de internet)
-python main.py                             conversa no terminal
+python main.py                             conversa no terminal, execução de comandos (/consulta /historico...)
 python demo_memoria.py --limite 3000       demonstração da memória (4 perguntas)
 pip install streamlit                      só na primeira vez
 streamlit run app.py                       a mesma interface visual, no seu computador
