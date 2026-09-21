@@ -18,6 +18,7 @@ A página usa a cota gratuita do Ollama Cloud do grupo. Se ela não responder, a
 - **Prompt em 3 versões** (`prompts/`), organizado com etiquetas XML.
 - **Proteções (guardrails)** que bloqueiam pedidos para "enganar" o bot, assuntos fora do tema e conselhos jurídicos, financeiros ou de mexer na parte elétrica.
 - **Teste com 19 perguntas** (`evals/`), feito no bot antigo (Sprint 2) e no novo.
+- **Relatórios de evolução** mais robustos na pasta docs/
 
 ## Como rodar no seu computador
 Precisa de **Python 3.12 ou 3.13** e de uma chave do Ollama Cloud (crie em ollama.com/settings, aba *Keys*).
@@ -36,7 +37,7 @@ No Linux ou Mac, troque a segunda linha por `source .venv/bin/activate`.
 ```
 copy .env.example .env
 ```
-No Linux ou Mac: `cp .env.example .env`. Abra o arquivo `.env` e cole a chave depois de `OLLAMA_API_KEY=`, sem aspas e sem espaços. **O `.env` não vai para o GitHub.**
+No Linux ou Mac: `cp .env.example .env`. Abra o arquivo `.env` e cole a chave depois de `OLLAMA_API_KEY=`, sem aspas e sem espaços. **O `.env` 
 
 **4. Rode o que quiser:**
 ```
