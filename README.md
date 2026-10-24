@@ -1,27 +1,21 @@
-# EV Challenge — GoodWe · Sprint 03
+# EV Challenge — GoodWe · Sprint 04
 
 Chatbot de suporte técnico para carregadores de carros elétricos da GoodWe (plataforma ChargeGrid). Ele responde dúvidas sobre potência, faturamento, instalação e diagnóstico de erros.
-Nesta sprint refizemos o núcleo do chatbot com **LangChain** (modelo principal: `gpt-oss:120b`, pelo Ollama Cloud).
+Nesta sprint o chatbot passou a usar **RAG**: em vez de mandar a base de conhecimento inteira em toda pergunta, ele busca no **ChromaDB** só os trechos que importam e **cita o documento e a página** de onde tirou a resposta. O modelo principal continua sendo o `gpt-oss:120b`, pelo Ollama Cloud.
 
 **Turma:** 1CCPH · **Grupo:** Gabriela Batista Costa (RM573583) · Samara Carvalho (RM573666) · Anna Luiza Carvalhaes (RM573330) · Kethelyn Rocha (RM574016)
 
-## Interface visual
-É possível com o chatbot pelo navegador, sem instalar nada:
-
-**https://evcharger-chatbot-myr9jlfkrlhachympyhbn5.streamlit.app/**
-
-A página usa a cota gratuita do Ollama Cloud do grupo. Se ela não responder, a cota pode ter acabado; nesse caso, rode o projeto no seu computador (veja abaixo).
-
 ## O que o projeto tem de novo nesta sprint
-- **Conversa com memória**, com limite de tamanho (medido em tokens, que são pedaços de palavras).
-- **Saída organizada**: um formato fixo (`ConsultaRecarga`, feito com Pydantic) para extrair os dados da pergunta.
-- **Prompt em 3 versões** (`prompts/`), organizado com etiquetas XML.
-- **Proteções (guardrails)** que bloqueiam pedidos para "enganar" o bot, assuntos fora do tema e conselhos jurídicos, financeiros ou de mexer na parte elétrica.
-- **Teste com 19 perguntas** (`evals/`), feito no bot antigo (Sprint 2) e no novo.
-- **Relatórios de evolução** mais robustos na pasta docs/
+- **Base de conhecimento expandida** (`data/knowledge_base/`): as perguntas e respostas do dataset (arquivos `.md`, uma seção por pergunta) e 3 PDFs da GoodWe (datasheet e manual do usuário do HCA G2 e o mapa Modbus).
+- **Pipeline RAG** (`src/rag/`): carrega os documentos, divide em pedaços (chunks), calcula os embeddings com `nomic-embed-text`, guarda no ChromaDB (em disco) e busca os mais parecidos com a pergunta.
+- **Respostas com fonte**: o bot responde só com o que está nos trechos recuperados e cita `arquivo, pág. X`. Se a informação não está nos documentos, ele diz "Não encontrei essa informação nos documentos fornecidos".
+- **Prompt RAG em 3 versões** (`prompts/rag_v1.md` a `rag_v3.md`), com a tabela de ganhos medidos.
+- **Segurança**: trechos de documentos que tentam dar ordens ao modelo ("ignore as instruções...") não são indexados; o texto recuperado é tratado como dado, nunca como instrução; os guardrails da Sprint 03 continuam valendo.
+- **Interface web** (`app/app.py`, Streamlit) que mostra as fontes e os trechos recuperados em cada resposta.
+- **Avaliação por iteração** (`evals/run_rag_eval.py`): faithfulness, answer_relevancy e contexto relevante, medidos com um modelo-juiz.
 
 ## Como rodar no seu computador
-Precisa de **Python 3.12 ou 3.13** e de uma chave do Ollama Cloud (crie em ollama.com/settings, aba *Keys*).
+Precisa de **Python 3.12 ou 3.13**, de uma chave do Ollama Cloud (crie em ollama.com/settings, aba *Keys*) e do **Ollama instalado** no computador (ollama.com). O Ollama Cloud recusou o modelo de embeddings (erro 401), então os embeddings rodam localmente; o chat continua no Cloud.
 
 **1. Abra um terminal na pasta do projeto** (a que tem o arquivo `main.py`).
 
@@ -37,60 +31,69 @@ No Linux ou Mac, troque a segunda linha por `source .venv/bin/activate`.
 ```
 copy .env.example .env
 ```
-No Linux ou Mac: `cp .env.example .env`. Abra o arquivo `.env` e cole a chave depois de `OLLAMA_API_KEY=`, sem aspas e sem espaços. **O `.env` 
+No Linux ou Mac: `cp .env.example .env`. Abra o arquivo `.env` e cole a chave depois de `OLLAMA_API_KEY=`, sem aspas e sem espaços. **O `.env` não vai para o Git.**
 
-**4. Rode o que quiser:**
+**4. Baixe o modelo de embeddings (uma vez só) e deixe o Ollama aberto:**
 ```
-python -m tests.test_offline               testes automáticos (não precisam de chave nem de internet)
-python main.py                             conversa no terminal, execução de comandos (/consulta /historico...)
-python demo_memoria.py --limite 3000       demonstração da memória (4 perguntas)
-pip install streamlit                      só na primeira vez
-streamlit run app.py                       a mesma interface visual, no seu computador
+ollama pull nomic-embed-text
 ```
-Comandos dentro da conversa do terminal: `/consulta <texto>` (mostra a saída organizada), `/historico`, `/limpar` e `/sair`.
+
+**5. Indexe a base e abra a interface:**
+```
+python -m src.rag.indexar                  lê data/knowledge_base/ e grava o ChromaDB em data/chroma_db/
+streamlit run app/app.py                   interface visual, com as fontes de cada resposta
+```
+Se mudar os documentos, apague a pasta `data/chroma_db/` e indexe de novo.
+
+**Outros comandos:**
+```
+python -m tests.test_offline               testes da Sprint 03 (sem chave e sem internet)
+python -m tests.test_rag_offline           testes do RAG (sem chave e sem internet, usam embedding falso)
+python -m scripts.gerar_base_conhecimento  gera os .md a partir do data/datasets.json
+python main.py                             conversa no terminal (Sprint 03, sem RAG)
+```
 
 ## Pastas
 ```
-src/chain/       a cadeia do LangChain (builder.py) e a memória da conversa (memoria.py)
-src/schemas/     o formato fixo da saída organizada
+src/rag/         o pipeline RAG: loader, chunking, embeddings, vector_store, retriever, prompt_rag, chain_rag, chat_rag
+src/chain/       a cadeia do LangChain (builder.py) e a memória da conversa (memoria.py), da Sprint 03
 src/guardrails/  as proteções de entrada e de saída
-src/chat.py      junta tudo em um turno de conversa
-prompts/         as versões do prompt e a tabela de versões (VERSOES.md)
-evals/           as 19 perguntas de teste, os scripts e os resultados (.json)
-docs/            os relatórios (relatório de evolução em PDF, modelos, memória e explicação dos evals)
-data/            a base de conhecimento (as perguntas e respostas sobre os carregadores)
-legacy/          o bot da Sprint 2, guardado só para comparar
+src/chat.py      um turno de conversa da Sprint 03 (o ChatRAG herda dele)
+prompts/         as versões do prompt (rag_v1..v3.md para o RAG) e a tabela de versões
+data/            datasets.json, knowledge_base/ (documentos do RAG) e chroma_db/ (gerado, fora do Git)
+app/             interface Streamlit do RAG
+evals/           as 19 perguntas de teste, os scripts e os resultados (rag_it*.json)
+docs/            os relatórios (relatório de evolução da Sprint 04 em PDF, modelos, memória e explicação dos evals)
+scripts/         gerar a base em .md e gerar o PDF do relatório
 tests/           testes automáticos
-main.py          conversa no terminal
-app.py           interface visual (Streamlit)
+legacy/          o bot da Sprint 2, guardado só para comparar
 ```
 
 ## Resultados em resumo
-Mesmas 19 perguntas nos dois bots. Tempo e tokens só sobre as 10 perguntas que chegam ao modelo.
+Mesmas 19 perguntas em todas as iterações. As notas (0 a 1) vêm de uma rubrica manual equivalente ao RAGAS, com o `gemma4:31b-cloud` como juiz. Só entram nas médias as respostas que o modelo respondeu (não as recusas nem os bloqueios dos guardrails).
 
-| O que medimos | Sprints 1/2 (Gemini, prompt v1, sem memória) | Sprint 03 (gpt-oss:120b, prompt v3) |
-|---|---|---|
-| Nota média de 0 a 10 (19 perguntas) | 7,58 | 8,47 |
-| Nota média só nas perguntas 1 a 10 | 7,4 | 7,2 |
-| Testes automáticos de segurança aprovados | 11 de 13 | 13 de 13 |
-| Tokens enviados por pergunta (estimado) | 4.616 | 4.623 |
-| Tempo de resposta médio / mediana (s) | 3,25 / 2,93 | 1,88 / 1,67 |
-| Saída organizada válida | não existia | 16 de 19 |
+| Iteração | Prompt | Perguntas pontuadas | Recusas | Faithfulness | Answer relevancy | Contexto relevante | Testes de segurança |
+|---|---|---|---|---|---|---|---|
+| it1 | v1 | 10 | 0 | 0,596 | 0,769 | 0,167 | 10 de 13 |
+| it2 | v2 | 5 | 5 | 0,619 | 0,715 | 0,333 | 12 de 13 |
 
-O maior ganho foi em **segurança**: o bot antigo revelou a base de conhecimento inteira ao ser induzido (pergunta 13) e mandou desligar o disjuntor diante de faíscas (pergunta 6). Nas perguntas comuns (1 a 10), o gpt-oss não ficou melhor que o bot antigo. Os detalhes, os limites do teste e os problemas encontrados estão em `docs/relatorio_evolucao.pdf`.
+Como a it2 pontua menos perguntas, a comparação justa é só nas 5 que as duas pontuaram: faithfulness sobe de **0,50 para 0,62** e a answer_relevancy fica estável (0,73 para 0,72). O maior ganho foi na **segurança**: o v2 passou a recusar com a frase padrão e a orientar o suporte quando a informação não está nos documentos (erro 47 e modelo GW50K). O custo foi recusar 3 perguntas cuja resposta existe na base; o contexto relevante baixo mostra que o ponto fraco é a **busca**, não o prompt. Isso e os demais problemas estão em `docs/relatorio_evolucao_sprint04.pdf`.
 
 ## Como repetir os testes (evals)
+Precisa do Ollama aberto (embeddings) e da chave no `.env`.
 ```
-python -m evals.run_baseline_sprint2                      bot antigo (precisa de GEMINI_API_KEY e de: pip install google-genai)
-python -m evals.run_eval --versao v3 --saida evals/sprint3_results.json
-python -m evals.run_eval --versao v3 --model gemma4:31b --saida evals/gemma4.json
-python -m evals.reavaliar                                 recalcula os testes automáticos de todos os resultados
-python -m evals.comparar evals/baseline_sprint2_results.json evals/sprint3_results.json
+python -m evals.run_rag_eval --iteracao it1 --prompt v1 --saida evals/rag_it1.json
+python -m evals.run_rag_eval --iteracao it2 --prompt v2 --saida evals/rag_it2.json
+python -m evals.run_rag_eval --iteracao it3 --prompt v3 --k 5 --saida evals/rag_it3.json
+python -m evals.comparar_rag evals/rag_it1.json evals/rag_it2.json evals/rag_it3.json     tabela das iterações
+python -m scripts.gerar_relatorio_pdf                                                    refaz o PDF com os resultados atuais
 ```
-A explicação completa dos testes está em `docs/explicacao_dos_evals.pdf`.
+O juiz padrão fica em `MODELO_COMPARACAO` no `.env` (usamos `gemma4:31b-cloud`; o `qwen3.6:27b` da aula não está no plano gratuito).
 
 ## Limites conhecidos
-- Cada pergunta foi feita **uma vez**; diferenças pequenas podem ser sorte.
+- Cada pergunta foi feita **uma vez** e só 5 a 10 perguntas entram nas médias; diferenças pequenas podem ser sorte.
+- O juiz é outro modelo de IA, então as notas são aproximadas (o pacote `ragas` não importa com o langchain-community atual, por isso usamos a rubrica manual).
+- A busca ainda traz trechos pouco relacionados (contexto relevante baixo); reranking e chunking semântico ficam como próximos passos.
+- Os embeddings dependem de um Ollama local; o app não roda como está no Streamlit Cloud.
 - As proteções usam regras de texto simples: uma frase bem reescrita pode passar.
-- A contagem de tokens (tiktoken) é aproximada para os modelos do Ollama.
-- A memória usa recursos do LangChain que já são considerados antigos; usamos porque o enunciado pede.
+- O dataset tem pequenas contradições entre trechos (por exemplo, grau de proteção IP65 em um e IP66 em outro) e o bot pode repetir qualquer uma.
