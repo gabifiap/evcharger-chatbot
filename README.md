@@ -76,8 +76,9 @@ Mesmas 19 perguntas em todas as iterações. As notas (0 a 1) vêm de uma rubric
 |---|---|---|---|---|---|---|---|
 | it1 | v1 | 10 | 0 | 0,596 | 0,769 | 0,167 | 10 de 13 |
 | it2 | v2 | 5 | 5 | 0,619 | 0,715 | 0,333 | 12 de 13 |
+| it3 | v3 (k=5) | 7 | 3 | 0,620 | 0,732 | 0,343 | 13 de 13 |
 
-Como a it2 pontua menos perguntas, a comparação justa é só nas 5 que as duas pontuaram: faithfulness sobe de **0,50 para 0,62** e a answer_relevancy fica estável (0,73 para 0,72). O maior ganho foi na **segurança**: o v2 passou a recusar com a frase padrão e a orientar o suporte quando a informação não está nos documentos (erro 47 e modelo GW50K). O custo foi recusar 3 perguntas cuja resposta existe na base; o contexto relevante baixo mostra que o ponto fraco é a **busca**, não o prompt. Isso e os demais problemas estão em `docs/relatorio_evolucao_sprint04.pdf`.
+Como cada iteração pontua um número diferente de perguntas, a comparação justa é só nas perguntas que as duas pontuaram. Da it1 para a it3 (7 perguntas em comum) o faithfulness sobe de **0,46 para 0,62**, a answer_relevancy fica estável (0,75 para 0,73) e o contexto relevante vai de 0,24 para 0,34. O maior ganho foi na **segurança**: de 10 para 13 testes aprovados, com a recusa padrão quando a informação não está nos documentos (erro 47 e modelo GW50K) e a resposta para faíscas passando a mandar manter distância e chamar um profissional, em vez de mandar reconectar o plugue. Com k=5 as recusas indevidas caíram de 3 para 1. O custo foi o prompt maior (de cerca de 450 para 1.230 tokens por pergunta). O contexto relevante continua baixo, então o ponto fraco é a **busca**. Os detalhes e os problemas encontrados estão em `docs/relatorio_evolucao_sprint04.pdf`.
 
 ## Como repetir os testes (evals)
 Precisa do Ollama aberto (embeddings) e da chave no `.env`.
@@ -92,6 +93,7 @@ O juiz padrão fica em `MODELO_COMPARACAO` no `.env` (usamos `gemma4:31b-cloud`;
 
 ## Limites conhecidos
 - Cada pergunta foi feita **uma vez** e só 5 a 10 perguntas entram nas médias; diferenças pequenas podem ser sorte.
+- Na resposta, o modelo ainda cita pelo número do trecho ("fonte: documento 4"); a lista de fontes com arquivo e página aparece no fim da resposta ou na interface.
 - O juiz é outro modelo de IA, então as notas são aproximadas (o pacote `ragas` não importa com o langchain-community atual, por isso usamos a rubrica manual).
 - A busca ainda traz trechos pouco relacionados (contexto relevante baixo); reranking e chunking semântico ficam como próximos passos.
 - Os embeddings dependem de um Ollama local; o app não roda como está no Streamlit Cloud.
