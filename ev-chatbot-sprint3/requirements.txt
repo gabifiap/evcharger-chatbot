@@ -4,6 +4,12 @@ langchain-classic>=1.0   # ConversationTokenBufferMemory (legacy) vive aqui no L
 pydantic>=2.5
 tiktoken>=0.7
 python-dotenv>=1.0
+langchain-community>=0.4   # PyMuPDFLoader
+langchain-chroma>=1.0
+langchain-text-splitters>=1.0
+chromadb>=1.0
+pymupdf>=1.24
+streamlit>=1.40
 # Opcionais:
 # langchain-google-genai   # bônus multi-provider (Gemini)
 # google-genai             # só para rodar o baseline legacy/bot_sprint2.py
